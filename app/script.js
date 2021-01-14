@@ -20,24 +20,67 @@ class App extends React.Component {
     timer: null,
   }
 
-  // formatTime(time) {
-  //   if (time > 60) {
-  //     const minutes = time / 60;
-  //   }
-  //   return Math.floor(minutes) + ':' + time % 60;
-  // }
+  formatTime(time) {   // przyjmuje 1 arg. w postaci liczbowej - arg. reprezentuje liczbę sekund
+    let minutes = Math.floor(time / 60);
+    if (minutes < 10) {
+      minutes = '0' + minutes;
+    }
+    let seconds = time % 60;
+    if (seconds < 10) {
+      seconds = '0' + seconds;
+    }
+    return minutes + ':' + seconds;
+  };                    // funkcja ma zwracać stringa w formacie mm:ss, gdzie mm - liczba minut (wynik time / 60), ss - liczba sekund (% z dzielenia time / 60)
 
-  /* if (minutes < 10) {
-    minutes = '0' + minutes;
+  startTimer() {
+    this.setState({
+      timer: setInterval(() => { this.step(); }, 1000),
+      time: 1200,
+      status: 'work',
+    });
+  };
+
+  step() {
+    let newTime = this.state.time - 1;
+    let newStatus = this.state.status;
+
+    if (newTime === 0) {
+      this.playBell();
+      if (newStatus === 'work') {
+        newStatus = 'rest';
+        newTime = 20;
+      }
+      else if (newStatus === 'rest') {
+        newStatus = 'work';
+        newTime = 1200;
+      }
+    }
+
+    this.setState({
+      time: newTime,
+      status: newStatus,
+    });
+  };
+
+  stopTimer() {
+    clearInterval(this.state.timer);
+    this.setState({
+      time: 0,
+      status: 'off',
+    });
   }
-  if (seconds < 10) {
-    seconds = '0' + seconds;
-  } */
+
+  closeApp() {
+    window.close();
+  }
+
+  playBell = () => {
+    const bell = new Audio('./sounds/bell.wav');
+    bell.play();
+  };
 
   render() {
     const { status, time, timer } = this.state;
-
-    // console.log(formatTime(1));
 
     return (
       <div>
@@ -45,11 +88,10 @@ class App extends React.Component {
         {(status === 'off') && <AppDescription />}
         {(status === 'work') && <img src="./images/work.png" />}
         {(status === 'rest') && <img src="./images/rest.png" />}
-        {(status !== 'off') && <div className="timer">(time)</div>}
-        {/* {(status !== 'off') && <div className="timer">{formatTime(time)}</div>} */}
-        {(status === 'off') && <button className="btn">Start</button>}
-        {(status !== 'off') && <button className="btn">Stop</button>}
-        <button className="btn btn-close">X</button>
+        {(status !== 'off') && <div className="timer">{this.formatTime(time)}</div>}
+        {(status === 'off') && <button className="btn" onClick={() => this.startTimer()}>Start</button>}
+        {(status !== 'off') && <button className="btn" onClick={() => this.stopTimer()}>Stop</button>}
+        <button className="btn btn-close" onClick={() => this.closeApp()}>X</button>
       </div>
     )
   }
